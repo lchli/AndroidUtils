@@ -9,7 +9,7 @@ import android.text.format.Formatter;
 import android.util.Log;
 
 
-import com.lch.util.executor.Result;
+import com.lch.util.executor.ResultDto;
 import com.lch.util.http.HttpUtils;
 
 import java.net.InetAddress;
@@ -99,7 +99,7 @@ public final class IPUtils {
 
     public static String getNetIP() {
         try {
-            Result<String> res = HttpUtils.get("http://pv.sohu.com/cityjson?ie=utf-8", null, null);
+            ResultDto<String> res = HttpUtils.get("http://pv.sohu.com/cityjson?ie=utf-8", null, null);
             String body = res.getData();
             Pattern pattern = Pattern
                     .compile("((?:(?:25[0-5]|2[0-4]\\d|((1\\d{2})|([1-9]?\\d)))\\.){3}(?:25[0-5]|2[0-4]\\d|((1\\d{2})|([1-9]?\\d))))");

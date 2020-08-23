@@ -1,22 +1,22 @@
 package com.lch.util.executor;
 
-public class Result<DATA> {
+public class ResultDto<DATA> {
     private int code;
     private String msg;
     private DATA data;
     private boolean hasError = false;
 
-    public Result(int code, String msg, DATA data) {
+    public ResultDto(int code, String msg, DATA data) {
         this.code = code;
         this.msg = msg;
         this.data = data;
     }
 
-    public Result(DATA data) {
+    public ResultDto(DATA data) {
         this.data = data;
     }
 
-    public Result() {
+    public ResultDto() {
     }
 
     public int getCode() {

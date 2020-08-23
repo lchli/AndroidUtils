@@ -4,7 +4,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import com.lch.util.IOUtils;
-import com.lch.util.executor.Result;
+import com.lch.util.executor.ResultDto;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,8 +23,8 @@ public final class HttpUtils {
     private static final String UTF8 = "UTF-8";
 
     @NonNull
-    public static Result<String> get(String urlPath, Map<String, String> headers, Map<String, String> params) {
-        Result<String> result = new Result<>();
+    public static ResultDto<String> get(String urlPath, Map<String, String> headers, Map<String, String> params) {
+        ResultDto<String> result = new ResultDto<>();
         InputStream ins = null;
 
         try {
@@ -70,8 +70,8 @@ public final class HttpUtils {
 
 
     @NonNull
-    public static Result<File> getFile(String urlPath, Map<String, String> headers, Map<String, String> params, File save) {
-        Result<File> result = new Result<>();
+    public static ResultDto<File> getFile(String urlPath, Map<String, String> headers, Map<String, String> params, File save) {
+        ResultDto<File> result = new ResultDto<>();
         InputStream ins = null;
         OutputStream outputStream = null;
 
@@ -119,8 +119,8 @@ public final class HttpUtils {
 
 
     @NonNull
-    public static Result<String> postForm(String urlPath, Map<String, String> headers, Map<String, String> params, int timeoutMills) {
-        Result<String> result = new Result<>();
+    public static ResultDto<String> postForm(String urlPath, Map<String, String> headers, Map<String, String> params, int timeoutMills) {
+        ResultDto<String> result = new ResultDto<>();
         InputStream ins = null;
         OutputStream os = null;
 
@@ -182,14 +182,14 @@ public final class HttpUtils {
 
 
     @NonNull
-    public static Result<String> postForm(String urlPath, Map<String, String> headers, Map<String, String> params) {
+    public static ResultDto<String> postForm(String urlPath, Map<String, String> headers, Map<String, String> params) {
         return postForm(urlPath, headers, params, TIME_OUT);
     }
 
 
     @NonNull
-    public static Result<String> postJson(String urlPath, Map<String, String> headers, String params) {
-        Result<String> result = new Result<>();
+    public static ResultDto<String> postJson(String urlPath, Map<String, String> headers, String params) {
+        ResultDto<String> result = new ResultDto<>();
         InputStream ins = null;
         OutputStream os = null;
 
