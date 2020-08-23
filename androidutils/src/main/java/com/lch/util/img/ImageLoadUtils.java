@@ -11,11 +11,14 @@ import com.lch.util.EncryptUtils;
 import com.lch.util.IOUtils;
 import com.lch.util.cache.DiskLruCacheHelper;
 import com.lch.util.executor.BgTask;
+import com.lch.util.http.SSLHelper;
 
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public final class ImageLoadUtils {
     private static final int MAX_CACHE_SIZE = 100 * 1024 * 1024;
@@ -146,6 +149,10 @@ public final class ImageLoadUtils {
         try {
             URL url = new URL(urlpath);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            if (connection instanceof HttpsURLConnection) {
+                SSLHelper.configSSL((HttpsURLConnection) connection);
+            }
+
             connection.setRequestMethod("GET");
             connection.setDoInput(true);
             connection.connect();
