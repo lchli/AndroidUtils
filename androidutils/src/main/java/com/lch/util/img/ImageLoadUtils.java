@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 import android.widget.ImageView;
 
-
 import com.lch.util.ContextUtil;
 import com.lch.util.EncryptUtils;
 import com.lch.util.IOUtils;
@@ -13,6 +12,7 @@ import com.lch.util.cache.DiskLruCacheHelper;
 import com.lch.util.executor.BgTask;
 import com.lch.util.http.SSLHelper;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
@@ -145,19 +145,13 @@ public final class ImageLoadUtils {
 
 
     private static Bitmap dowloadImage(String urlpath, final int resizeW, final int resizeH) {
+        if (TextUtils.isEmpty(urlpath)) {
+            return null;
+        }
+
         InputStream ins = null;
         try {
-            URL url = new URL(urlpath);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            if (connection instanceof HttpsURLConnection) {
-                SSLHelper.configSSL((HttpsURLConnection) connection);
-            }
-
-            connection.setRequestMethod("GET");
-            connection.setDoInput(true);
-            connection.connect();
-
-            ins = connection.getInputStream();
+            ins = getInputStream(urlpath);
             byte[] bytes = IOUtils.toByteArray(ins);
 
             if (resizeW > 0 && resizeH > 0) {
@@ -171,6 +165,25 @@ public final class ImageLoadUtils {
         } finally {
             IOUtils.closeQuietly(ins);
         }
+
+    }
+
+    private static InputStream getInputStream(String path) throws Exception {
+        if (!path.startsWith("http://") && !path.startsWith("https://")) {
+            return new FileInputStream(path);
+        }
+
+        URL url = new URL(path);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        if (connection instanceof HttpsURLConnection) {
+            SSLHelper.configSSL((HttpsURLConnection) connection);
+        }
+
+        connection.setRequestMethod("GET");
+        connection.setDoInput(true);
+        connection.connect();
+
+        return connection.getInputStream();
 
     }
 
@@ -218,8 +231,6 @@ public final class ImageLoadUtils {
         }
         return inSampleSize;
     }
-
-
 
 
 }
