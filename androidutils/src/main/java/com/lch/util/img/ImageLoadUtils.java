@@ -2,6 +2,7 @@ package com.lch.util.img;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.text.TextUtils;
 import android.widget.ImageView;
 
@@ -17,6 +18,7 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -26,21 +28,34 @@ public final class ImageLoadUtils {
     private static DiskLruCacheHelper cacheHelper;
 
     public static void load(final String url, ImageView imageView, final BitmapTransform transform) {//to do disk cache.
-        load(url, imageView, 0, 0, transform);
+        load(url, imageView, 0, 0, transform, false);
+    }
+
+    public static void load(final String url, ImageView imageView, final BitmapTransform transform, boolean isVideo) {
+        load(url, imageView, 0, 0, transform, isVideo);
     }
 
 
     public static void load(final String url, ImageView imageView) {
-        load(url, imageView, 0, 0, null);
+        load(url, imageView, 0, 0, null, false);
+    }
+
+    public static void load(final String url, ImageView imageView, boolean isVideo) {
+        load(url, imageView, 0, 0, null, isVideo);
     }
 
 
     public static void load(final String url, ImageView imageView, final int resizeW, final int resizeH) {
-        load(url, imageView, resizeW, resizeH, null);
+        load(url, imageView, resizeW, resizeH, null, false);
+    }
+
+    public static void load(final String url, ImageView imageView, final int resizeW, final int resizeH, boolean isVideo) {
+        load(url, imageView, resizeW, resizeH, null, isVideo);
     }
 
 
-    public static void load(final String url, ImageView imageView, final int resizeW, final int resizeH, final BitmapTransform transform) {
+    public static void load(final String url, ImageView imageView, final int resizeW, final int resizeH, final BitmapTransform transform,
+                            final boolean isVideo) {
         try {
 
             if (TextUtils.isEmpty(url) || imageView == null) {
@@ -52,7 +67,7 @@ public final class ImageLoadUtils {
             new BgTask<Bitmap>() {
                 @Override
                 protected Bitmap doInBackground() {
-                    return getOrDownloadBitmap(url, resizeW, resizeH, transform);
+                    return getOrDownloadBitmap(url, resizeW, resizeH, transform, isVideo);
                 }
 
                 @Override
@@ -81,7 +96,8 @@ public final class ImageLoadUtils {
     }
 
 
-    private static Bitmap getOrDownloadBitmap(String url, final int resizeW, final int resizeH, final BitmapTransform transformer) {
+    private static Bitmap getOrDownloadBitmap(String url, final int resizeW, final int resizeH, final BitmapTransform transformer,
+                                              boolean isVideo) {
         try {
 
             final String key = EncryptUtils.encryptMD5ToString(url);
@@ -91,7 +107,7 @@ public final class ImageLoadUtils {
                 return transform(cache, transformer);
             }
 
-            Bitmap bmp = dowloadImage(url, resizeW, resizeH);
+            Bitmap bmp = dowloadImage(url, resizeW, resizeH, isVideo);
             if (bmp != null) {
                 putCache(key, bmp);
             }
@@ -144,9 +160,13 @@ public final class ImageLoadUtils {
     }
 
 
-    private static Bitmap dowloadImage(String urlpath, final int resizeW, final int resizeH) {
+    private static Bitmap dowloadImage(String urlpath, final int resizeW, final int resizeH, boolean isVideo) {
         if (TextUtils.isEmpty(urlpath)) {
             return null;
+        }
+
+        if (isVideo) {
+            return getVideoThumbnail(urlpath);
         }
 
         InputStream ins = null;
@@ -167,6 +187,7 @@ public final class ImageLoadUtils {
         }
 
     }
+
 
     private static InputStream getInputStream(String path) throws Exception {
         if (!path.startsWith("http://") && !path.startsWith("https://")) {
@@ -230,6 +251,27 @@ public final class ImageLoadUtils {
             inSampleSize <<= 1;
         }
         return inSampleSize;
+    }
+
+    /**
+     * 获取本地视频的第一帧
+     */
+    private static Bitmap getVideoThumbnail(String filePath) {
+        Bitmap bitmap = null;
+        //MediaMetadataRetriever 是android中定义好的一个类，提供了统一
+        //的接口，用于从输入的媒体文件中取得帧和元数据；
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            //根据文件路径获取缩略图
+            retriever.setDataSource(filePath);
+            //获得第一帧图片
+            bitmap = retriever.getFrameAtTime();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            retriever.release();
+        }
+        return bitmap;
     }
 
 
