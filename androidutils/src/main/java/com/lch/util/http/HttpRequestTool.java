@@ -13,7 +13,7 @@ public final class HttpRequestTool {
     public HttpRequestTool() {
     }
 
-    public static String addParamToUrl(@NonNull String url, @NonNull Map<String, String> params) {
+    public static String addParamToUrl(@NonNull String url, @NonNull Map<String, Object> params) {
 
         if (url.contains("?")) {
             if (!url.endsWith("&") && !url.endsWith("?")) {

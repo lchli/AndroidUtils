@@ -34,7 +34,7 @@ public final class HttpUtils {
     public static final String CONTENT_TYPE_MULTI_FORM = "multipart/form-data";
 
     @NonNull
-    public static ResultDto<String> get(String urlPath, Map<String, String> headers, Map<String, String> params) {
+    public static ResultDto<String> get(String urlPath, Map<String, String> headers, Map<String, Object> params) {
         ResultDto<String> result = new ResultDto<>();
         InputStream ins = null;
 
@@ -72,7 +72,7 @@ public final class HttpUtils {
 
 
     @NonNull
-    public static ResultDto<File> getFile(String urlPath, Map<String, String> headers, Map<String, String> params, File save) {
+    public static ResultDto<File> getFile(String urlPath, Map<String, String> headers, Map<String, Object> params, File save) {
         ResultDto<File> result = new ResultDto<>();
         InputStream ins = null;
         OutputStream outputStream = null;
@@ -112,7 +112,7 @@ public final class HttpUtils {
 
 
     @NonNull
-    public static ResultDto<String> postForm(String urlPath, Map<String, String> headers, Map<String, String> params, int timeoutMills) {
+    public static ResultDto<String> postForm(String urlPath, Map<String, String> headers, Map<String, Object> params, int timeoutMills) {
         ResultDto<String> result = new ResultDto<>();
         InputStream ins = null;
         OutputStream os = null;
@@ -129,8 +129,8 @@ public final class HttpUtils {
 
             Uri.Builder builder = new Uri.Builder();
             if (params != null) {
-                for (Map.Entry<String, String> entry : params.entrySet()) {
-                    builder.appendQueryParameter(entry.getKey(), entry.getValue());
+                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                    builder.appendQueryParameter(entry.getKey(), entry.getValue()!=null? entry.getValue().toString():"");
                 }
             }
             String query = builder.build().getEncodedQuery();
@@ -220,7 +220,7 @@ public final class HttpUtils {
 
 
     @NonNull
-    public static ResultDto<String> postForm(String urlPath, Map<String, String> headers, Map<String, String> params) {
+    public static ResultDto<String> postForm(String urlPath, Map<String, String> headers, Map<String, Object> params) {
         return postForm(urlPath, headers, params, TIME_OUT);
     }
 
