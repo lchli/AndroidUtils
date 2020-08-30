@@ -176,6 +176,7 @@ public final class HttpUtils {
         try {
 
             HttpURLConnection conn = createConnection(urlPath, "POST", CONTENT_TYPE_MULTI_FORM, timeoutMills);
+            conn.setChunkedStreamingMode(256 * 1024);
 
             if (headers != null) {
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
