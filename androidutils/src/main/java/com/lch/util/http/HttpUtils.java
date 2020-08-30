@@ -164,13 +164,18 @@ public final class HttpUtils {
 
     @NonNull
     public static ResultDto<String> postMultiPart(String urlPath, Map<String, String> headers, Map<String, Object> params) {
+        return postMultiPart(urlPath,headers,params,TIME_OUT);
+    }
+
+    @NonNull
+    public static ResultDto<String> postMultiPart(String urlPath, Map<String, String> headers, Map<String, Object> params,int timeoutMills) {
         ResultDto<String> result = new ResultDto<>();
         InputStream ins = null;
         OutputStream os = null;
 
         try {
 
-            HttpURLConnection conn = createConnection(urlPath, "POST", CONTENT_TYPE_MULTI_FORM, TIME_OUT);
+            HttpURLConnection conn = createConnection(urlPath, "POST", CONTENT_TYPE_MULTI_FORM, timeoutMills);
 
             if (headers != null) {
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
