@@ -28,10 +28,11 @@ import javax.net.ssl.HttpsURLConnection;
 public final class HttpUtils {
     private static final int TIME_OUT = 30_000;
     private static final String UTF8 = "UTF-8";
-    private static final String mCharset = UTF8;
-    private static final String mBoundary = createBoundary();
+    private static final String M_CHARSET = UTF8;
+    private static final String BOUNDARY = createBoundary();
     public static final String VALUE_APPLICATION_STREAM = "application/octet-stream";
-    public static final String CONTENT_TYPE_MULTI_FORM = "multipart/form-data";
+    public static final String CONTENT_TYPE_MULTI_FORM = "multipart/form-data; boundary=" + BOUNDARY;
+
 
     @NonNull
     public static ResultDto<String> get(String urlPath, Map<String, String> headers, Map<String, Object> params) {
@@ -130,7 +131,7 @@ public final class HttpUtils {
             Uri.Builder builder = new Uri.Builder();
             if (params != null) {
                 for (Map.Entry<String, Object> entry : params.entrySet()) {
-                    builder.appendQueryParameter(entry.getKey(), entry.getValue()!=null? entry.getValue().toString():"");
+                    builder.appendQueryParameter(entry.getKey(), entry.getValue() != null ? entry.getValue().toString() : "");
                 }
             }
             String query = builder.build().getEncodedQuery();
@@ -164,11 +165,11 @@ public final class HttpUtils {
 
     @NonNull
     public static ResultDto<String> postMultiPart(String urlPath, Map<String, String> headers, Map<String, Object> params) {
-        return postMultiPart(urlPath,headers,params,TIME_OUT);
+        return postMultiPart(urlPath, headers, params, TIME_OUT);
     }
 
     @NonNull
-    public static ResultDto<String> postMultiPart(String urlPath, Map<String, String> headers, Map<String, Object> params,int timeoutMills) {
+    public static ResultDto<String> postMultiPart(String urlPath, Map<String, String> headers, Map<String, Object> params, int timeoutMills) {
         ResultDto<String> result = new ResultDto<>();
         InputStream ins = null;
         OutputStream os = null;
@@ -201,9 +202,8 @@ public final class HttpUtils {
                 }
             }
 
-            IOTools.write(os, "\r\n", mCharset);
-            IOTools.write(os, "--" + mBoundary + "--\r\n", mCharset);
-
+            IOTools.write(os, "\r\n", M_CHARSET);
+            IOTools.write(os, "--" + BOUNDARY + "--\r\n", M_CHARSET);
 
             os.flush();
 
@@ -278,6 +278,7 @@ public final class HttpUtils {
         }
         conn.setReadTimeout(timeoutMills);
         conn.setConnectTimeout(timeoutMills);
+        conn.setInstanceFollowRedirects(false);
         conn.setRequestMethod(method);
         if (contentType != null) {
             conn.setRequestProperty("Content-Type", contentType);
@@ -291,47 +292,47 @@ public final class HttpUtils {
 
 
     private static void writeFormString(OutputStream writer, String key, String value) throws IOException {
-        IOTools.write(writer, "--" + mBoundary + "\r\n", mCharset);
-        IOTools.write(writer, "Content-Disposition: form-data; name=\"" + key + "\"", mCharset);
-        IOTools.write(writer, "\r\n\r\n", mCharset);
-        IOTools.write(writer, value, mCharset);
-        IOTools.write(writer, "\r\n", mCharset);
+        IOTools.write(writer, "--" + BOUNDARY + "\r\n", M_CHARSET);
+        IOTools.write(writer, "Content-Disposition: form-data; name=\"" + key + "\"", M_CHARSET);
+        IOTools.write(writer, "\r\n\r\n", M_CHARSET);
+        IOTools.write(writer, value, M_CHARSET);
+        IOTools.write(writer, "\r\n", M_CHARSET);
     }
 
     private static void writeFormFile(OutputStream writer, String key, File value) throws IOException {
         if (value == null) {
             return;
         }
-        IOTools.write(writer, "--" + mBoundary + "\r\n", mCharset);
-        IOTools.write(writer, "Content-Disposition: form-data; name=\"" + key + "\"", mCharset);
-        IOTools.write(writer, "; filename=\"" + value.getName() + "\"", mCharset);
-        IOTools.write(writer, "\r\n", mCharset);
-        IOTools.write(writer, "Content-Type: " + contentType(value) + "\r\n\r\n", mCharset);
+        IOTools.write(writer, "--" + BOUNDARY + "\r\n", M_CHARSET);
+        IOTools.write(writer, "Content-Disposition: form-data; name=\"" + key + "\"", M_CHARSET);
+        IOTools.write(writer, "; filename=\"" + value.getName() + "\"", M_CHARSET);
+        IOTools.write(writer, "\r\n", M_CHARSET);
+        IOTools.write(writer, "Content-Type: " + contentType(value) + "\r\n\r\n", M_CHARSET);
         if (writer instanceof LengthOutputStream) {
             ((LengthOutputStream) writer).write(value.length());
         } else {
             writeFile(writer, value);
         }
 
-        IOTools.write(writer, "\r\n", mCharset);
+        IOTools.write(writer, "\r\n", M_CHARSET);
     }
 
     private static void writeFormFileBytes(OutputStream writer, String key, byte[] value) throws IOException {
         if (value == null) {
             return;
         }
-        IOTools.write(writer, "--" + mBoundary + "\r\n", mCharset);
-        IOTools.write(writer, "Content-Disposition: form-data; name=\"" + key + "\"", mCharset);
-        IOTools.write(writer, "; filename=\"" + UUID.randomUUID().toString() + "\"", mCharset);
-        IOTools.write(writer, "\r\n", mCharset);
-        IOTools.write(writer, "Content-Type: " + VALUE_APPLICATION_STREAM + "\r\n\r\n", mCharset);
+        IOTools.write(writer, "--" + BOUNDARY + "\r\n", M_CHARSET);
+        IOTools.write(writer, "Content-Disposition: form-data; name=\"" + key + "\"", M_CHARSET);
+        IOTools.write(writer, "; filename=\"" + UUID.randomUUID().toString() + "\"", M_CHARSET);
+        IOTools.write(writer, "\r\n", M_CHARSET);
+        IOTools.write(writer, "Content-Type: " + VALUE_APPLICATION_STREAM + "\r\n\r\n", M_CHARSET);
         if (writer instanceof LengthOutputStream) {
             ((LengthOutputStream) writer).write(value.length);
         } else {
             IOTools.write(writer, value);
         }
 
-        IOTools.write(writer, "\r\n", mCharset);
+        IOTools.write(writer, "\r\n", M_CHARSET);
     }
 
     private static void writeFile(OutputStream writer, File file) throws IOException {
