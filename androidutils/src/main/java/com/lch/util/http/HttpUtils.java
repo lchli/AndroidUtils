@@ -3,6 +3,7 @@ package com.lch.util.http;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import com.lch.util.IOTools;
@@ -321,9 +322,11 @@ public final class HttpUtils {
         if (value == null) {
             return;
         }
+        String filename=UUID.randomUUID().toString().replaceAll("-","");
+
         IOTools.write(writer, "--" + BOUNDARY + "\r\n", M_CHARSET);
         IOTools.write(writer, "Content-Disposition: form-data; name=\"" + key + "\"", M_CHARSET);
-        IOTools.write(writer, "; filename=\"" + UUID.randomUUID().toString() + "\"", M_CHARSET);
+        IOTools.write(writer, "; filename=\"" + filename + "\"", M_CHARSET);
         IOTools.write(writer, "\r\n", M_CHARSET);
         IOTools.write(writer, "Content-Type: " + VALUE_APPLICATION_STREAM + "\r\n\r\n", M_CHARSET);
         if (writer instanceof LengthOutputStream) {

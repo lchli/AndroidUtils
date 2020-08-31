@@ -2,12 +2,17 @@ package com.lch.util.demo;
 
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 
+import com.lch.util.IOUtils;
 import com.lch.util.executor.ResultDto;
 import com.lch.util.http.HttpUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,11 +29,14 @@ public class MainActivity extends Activity {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                File f= new File(Environment.getExternalStorageDirectory(),"shot.jpg");
+                Bitmap t= BitmapFactory.decodeFile(f.getAbsolutePath());
+
                 Map<String,Object> params = new HashMap<>();
 
                 params.put("fileType", "video");
-                params.put("file", new File("/storage/emulated/999/Pictures/WeiXin/wx_camera_1597632437686.mp4"));
-                params.put("userToken", "userToken");
+                params.put("file", bmpToArray(t));
+                params.put("userToken", "1559399493e436e47362adfb47c3b0d7");
 
                 ResultDto<String> response = HttpUtils.postMultiPart(
                         UPLOAD_VIDEO,
@@ -43,4 +51,14 @@ public class MainActivity extends Activity {
         }).start();
 
     }
+
+    private byte[] bmpToArray(Bitmap bmp) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+       byte[] byteArray = stream.toByteArray();
+        IOUtils.closeQuietly(stream);
+
+        return byteArray;
+    }
+
 }
