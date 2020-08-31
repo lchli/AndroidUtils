@@ -256,7 +256,7 @@ public final class ImageLoadUtils {
     /**
      * 获取本地视频的第一帧
      */
-    private static Bitmap getVideoThumbnail(String filePath) {
+    public static Bitmap getVideoThumbnail(String filePath) {
         Bitmap bitmap = null;
         //MediaMetadataRetriever 是android中定义好的一个类，提供了统一
         //的接口，用于从输入的媒体文件中取得帧和元数据；
