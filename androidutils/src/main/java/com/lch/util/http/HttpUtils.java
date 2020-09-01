@@ -47,6 +47,7 @@ public final class HttpUtils {
             }
 
             HttpURLConnection conn = createConnection(urlPath, "GET", null, TIME_OUT);
+            conn.setDoInput(true);
 
             if (headers != null) {
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -85,6 +86,7 @@ public final class HttpUtils {
             }
 
             HttpURLConnection conn = createConnection(urlPath, "GET", null, TIME_OUT);
+            conn.setDoInput(true);
 
             if (headers != null) {
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -122,6 +124,8 @@ public final class HttpUtils {
         try {
 
             HttpURLConnection conn = createConnection(urlPath, "POST", "application/x-www-form-urlencoded", timeoutMills);
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
 
             if (headers != null) {
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -179,6 +183,8 @@ public final class HttpUtils {
 
             HttpURLConnection conn = createConnection(urlPath, "POST", CONTENT_TYPE_MULTI_FORM, timeoutMills);
             conn.setChunkedStreamingMode(256 * 1024);
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
 
             if (headers != null) {
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -241,6 +247,8 @@ public final class HttpUtils {
         try {
 
             HttpURLConnection conn = createConnection(urlPath, "POST", "application/json; utf-8", TIME_OUT);
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
 
             if (headers != null) {
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -285,8 +293,6 @@ public final class HttpUtils {
             conn.setRequestProperty("Content-Type", contentType);
         }
         conn.setUseCaches(false);
-        conn.setDoOutput(true);
-        conn.setDoInput(true);
 
         return conn;
     }
