@@ -18,10 +18,13 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
 
 import javax.net.ssl.HttpsURLConnection;
 
+/**
+ * Deprecated ,use AsyncLoaders instead.
+ */
+@Deprecated
 public final class ImageLoadUtils {
     private static final int MAX_CACHE_SIZE = 100 * 1024 * 1024;
     private static final String CACHE_DIR_NAME = "srsc-ad-sdk-cache";

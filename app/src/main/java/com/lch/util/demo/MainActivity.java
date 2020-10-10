@@ -4,13 +4,19 @@ package com.lch.util.demo;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.lch.util.IOUtils;
 import com.lch.util.executor.ResultDto;
 import com.lch.util.http.HttpUtils;
+import com.lch.util.img.AsyncDataLoader;
+import com.lch.util.img.AsyncLoaders;
+import com.lch.util.img.CircleTransform;
+import com.lch.util.img.ImgLoadParam;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -49,6 +55,26 @@ public class MainActivity extends Activity {
                 Log.e("s","upload2 response.data:"+response.getData());
             }
         }).start();
+
+        final ImageView iv=new ImageView(this);
+
+        AsyncLoaders.IMG.load(ImgLoadParam.create().setModel(""), new AsyncDataLoader.AsyncDataTargetView<Bitmap>() {
+            @Override
+            public void bindResult(Bitmap res) {
+                iv.setImageBitmap(res);
+            }
+
+            @Override
+            public void setViewUid(Object uid) {
+                iv.setTag(uid);
+
+            }
+
+            @Override
+            public Object getViewUid() {
+                return iv.getTag();
+            }
+        }, new CircleTransform(5f, Color.BLACK));
 
     }
 
