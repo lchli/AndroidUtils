@@ -1,8 +1,10 @@
 package com.lch.util.img;
 
+import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.widget.ImageView;
 
@@ -18,13 +20,10 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 
 import javax.net.ssl.HttpsURLConnection;
 
-/**
- * Deprecated ,use AsyncLoaders instead.
- */
-@Deprecated
 public final class ImageLoadUtils {
     private static final int MAX_CACHE_SIZE = 100 * 1024 * 1024;
     private static final String CACHE_DIR_NAME = "srsc-ad-sdk-cache";
@@ -56,12 +55,17 @@ public final class ImageLoadUtils {
         load(url, imageView, resizeW, resizeH, null, isVideo);
     }
 
+    public static void load(final Object url, ImageView imageView,  final BitmapTransform transform,
+                            final boolean isVideo) {
+        load(url,imageView,-1,-1,transform,isVideo);
+    }
 
-    public static void load(final String url, ImageView imageView, final int resizeW, final int resizeH, final BitmapTransform transform,
+
+    public static void load(final Object url, ImageView imageView, final int resizeW, final int resizeH, final BitmapTransform transform,
                             final boolean isVideo) {
         try {
 
-            if (TextUtils.isEmpty(url) || imageView == null) {
+            if (url == null || imageView == null) {
                 return;
             }
             imageView.setTag(url);
@@ -82,7 +86,7 @@ public final class ImageLoadUtils {
                     if (iv == null) {
                         return;
                     }
-                    String tagurl = (String) iv.getTag();
+                    Object tagurl = (Object) iv.getTag();
                     if (!url.equals(tagurl)) {
                         return;
                     }
@@ -99,11 +103,11 @@ public final class ImageLoadUtils {
     }
 
 
-    private static Bitmap getOrDownloadBitmap(String url, final int resizeW, final int resizeH, final BitmapTransform transformer,
+    private static Bitmap getOrDownloadBitmap(Object url, final int resizeW, final int resizeH, final BitmapTransform transformer,
                                               boolean isVideo) {
         try {
 
-            final String key = EncryptUtils.encryptMD5ToString(url);
+            final String key = EncryptUtils.encryptMD5ToString(url + "");
 
             Bitmap cache = getCache(key);
             if (cache != null) {
@@ -163,8 +167,8 @@ public final class ImageLoadUtils {
     }
 
 
-    private static Bitmap dowloadImage(String urlpath, final int resizeW, final int resizeH, boolean isVideo) {
-        if (TextUtils.isEmpty(urlpath)) {
+    private static Bitmap dowloadImage(Object urlpath, final int resizeW, final int resizeH, boolean isVideo) {
+        if (urlpath == null) {
             return null;
         }
 
@@ -175,6 +179,9 @@ public final class ImageLoadUtils {
         InputStream ins = null;
         try {
             ins = getInputStream(urlpath);
+            if (ins == null) {
+                return null;
+            }
             byte[] bytes = IOUtils.toByteArray(ins);
 
             if (resizeW > 0 && resizeH > 0) {
@@ -192,22 +199,31 @@ public final class ImageLoadUtils {
     }
 
 
-    private static InputStream getInputStream(String path) throws Exception {
-        if (!path.startsWith("http://") && !path.startsWith("https://")) {
-            return new FileInputStream(path);
+    private static InputStream getInputStream(Object path) throws Exception {
+        if (path instanceof Uri) {
+            ContentResolver aResolver = ContextUtil.getContext().getContentResolver();
+            return aResolver.openInputStream((Uri) path);
         }
 
-        URL url = new URL(path);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        if (connection instanceof HttpsURLConnection) {
-            SSLHelper.configSSL((HttpsURLConnection) connection);
+        if (path instanceof String) {
+            if (!path.toString().startsWith("http://") && !path.toString().startsWith("https://")) {
+                return new FileInputStream(path.toString());
+            }
+
+            URL url = new URL(path.toString());
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            if (connection instanceof HttpsURLConnection) {
+                SSLHelper.configSSL((HttpsURLConnection) connection);
+            }
+
+            connection.setRequestMethod("GET");
+            connection.setDoInput(true);
+            connection.connect();
+
+            return connection.getInputStream();
         }
 
-        connection.setRequestMethod("GET");
-        connection.setDoInput(true);
-        connection.connect();
-
-        return connection.getInputStream();
+        return null;
 
     }
 
@@ -259,14 +275,18 @@ public final class ImageLoadUtils {
     /**
      * 获取本地视频的第一帧
      */
-    public static Bitmap getVideoThumbnail(String filePath) {
+    public static Bitmap getVideoThumbnail(Object filePath) {
         Bitmap bitmap = null;
         //MediaMetadataRetriever 是android中定义好的一个类，提供了统一
         //的接口，用于从输入的媒体文件中取得帧和元数据；
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
             //根据文件路径获取缩略图
-            retriever.setDataSource(filePath);
+            if (filePath instanceof Uri) {
+                retriever.setDataSource(ContextUtil.getContext(), (Uri) filePath);
+            } else if (filePath instanceof String) {
+                retriever.setDataSource(filePath.toString());
+            }
             //获得第一帧图片
             bitmap = retriever.getFrameAtTime();
         } catch (Exception e) {
